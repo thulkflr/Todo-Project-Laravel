@@ -1,0 +1,11 @@
+{
+    "mcpServers": {
+        "laravel-boost": {
+            "command": "/usr/bin/php8.4",
+            "args": [
+                "/home/thu-alkfl-rababa-h/Desktop/Laravel project/first-laravel-project/laravel-first-project/artisan",
+                "boost:mcp"
+            ]
+        }
+    }
+}
