@@ -65,7 +65,7 @@ class User extends Authenticatable
             ->implode('');
     }
 
-    public function getUserTasks(): HasMany
+    public function todoModel(): HasMany
     {
         return $this->hasMany(TodoModel::class)->orderByDesc('created_at');
 

@@ -2,7 +2,9 @@
 
 namespace App\Http\Requests;
 
+use App\Enums\TodoStatus;
 use Illuminate\Foundation\Http\FormRequest;
+use Illuminate\Validation\Rule;
 
 class StoreTaskRequest extends FormRequest
 {
@@ -11,7 +13,7 @@ class StoreTaskRequest extends FormRequest
      */
     public function authorize(): bool
     {
-        return false;
+        return true;
     }
 
     /**
@@ -22,7 +24,15 @@ class StoreTaskRequest extends FormRequest
     public function rules(): array
     {
         return [
-            //
+            'title' => ['required', 'string', 'max:255'],
+            'body' => ['nullable', 'string'],
+            'completed' => ['required', Rule::enum(TodoStatus::class)],
+        ];
+    }
+    public function messages(): array
+    {
+        return [
+            'title.required' => 'Please enter a title.',
         ];
     }
 }

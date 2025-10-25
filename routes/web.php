@@ -23,9 +23,9 @@ Route::middleware('auth')->group(function () {
 
 
 Route::middleware(['auth'])->group(function () {
-    Route::get('/add-post', [TodoController::class, 'addPost']);
-    Route::get('/delete-post/{id}', [TodoController::class, 'deletePost']);
-    Route::get('/update-post/{id}', [TodoController::class, 'updatePost']);
+    Route::post('/add-post', [TodoController::class, 'addPost']);
+    Route::delete('/delete-post/{id}', [TodoController::class, 'deletePost']);
+    Route::put('/update-post/{id}', [TodoController::class, 'updatePost']);
 });
 // اختصرت السوالف الي فوق لما استخدمت Route::resource
 Route::middleware(['auth'])->group(function () {

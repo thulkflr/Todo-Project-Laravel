@@ -2,6 +2,8 @@
 
 namespace Database\Factories;
 
+use App\Enums\TodoStatus;
+use App\Models\User;
 use Illuminate\Database\Eloquent\Factories\Factory;
 
 /**
@@ -17,7 +19,12 @@ class TodoModelFactory extends Factory
     public function definition(): array
     {
         return [
-            //
+            'user_id' => User::factory(),
+            'title' => fake()->sentence(4),
+            'body' => fake()->paragraph(2),
+            'completed' => fake()->randomElement(TodoStatus::class),
+
+
         ];
     }
 }

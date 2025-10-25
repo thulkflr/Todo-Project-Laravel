@@ -2,48 +2,106 @@
 
 namespace App\Http\Controllers;
 
+use App\Enums\TodoStatus;
 use App\Models\TodoModel;
 use Illuminate\Http\Request;
-
+use App\Http\Requests\UpdateTaskRequest;
+use App\Http\Requests\StoreTaskRequest;
 class TodoController extends Controller
 {
-    public function addPost(Request $request){
-        $post =TodoModel::create([
-//            'title'=> $request->input('title'),
-//            'body'=> $request->input('body'),
-//            'is_done'=> $request->input('is_done'),
-            'title'=>'hello',
-            'body'=>'hello world',
-            'is_done'=>false,
-            'user_id'=>1,
-        ]);
+    /**
+     * Display a listing of the resource.
+     */
+    public function index(Request $request)
+    {
 
-        return response()->json(['post'=>$post,'message'=>'Task created success'],200);
-    }
-    public function getPosts(){
-        $posts = TodoModel::all();
-        return response()->json(['post'=>$posts,'message'=>'Task created success'],200);
+        $user =$request->user();
+        $userTasks = $user->todoModel();
 
-    }
-    public function getPost($id){
-        $post= TodoModel::where('id',$id)->first();
-        return response()->json(['post'=>$post,'message'=>'Task created success'],200);
-    }
-    public function updatePost(Request $request,$id){
-        $post=TodoModel::where('id',$id)->update([
-            'title'=>'hello Messi',
-            'body'=>'hello in Messi world',
-            'is_done'=>true,
-
-        ]);
-        if(!$post){
-            return response()->json(['post'=>$post,'message'=>'the task doesnt exists'],200);
+        if($request->filled('search')){
+            $userTasks->where('title','like','%'.$request->input('search').'%');
         }
-        return response()->json(['post'=>$post,'message'=>'Task updated success'],200);
-    }
-    public function deletePost($id){
-        $post=TodoModel::where(['id'=>$id])->delete();
-        return response()->json(['message'=>'Task deleted success'],200);
+
+        if($request->filled('completed')){
+            $userTasks->where('completed',$request->input('completed'));
+        }
+        $tasks = $userTasks->paginate(10)->withQueryString();
+
+        return view('todos.index',[
+            'tasks' => $tasks,
+            'request' => $request,
+            'statuses'=>TodoStatus::cases()
+        ]);
+
+
     }
 
+    /**
+     * Show the form for creating a new resource.
+     */
+    public function create()
+    {
+        return view('todos.create',[
+            'statuses'=>TodoStatus::cases()
+        ]);
+    }
+
+    /**
+     * Store a newly created resource in storage.
+     */
+    public function store(Request $request)
+    {
+        $validatedData = $request->validate([]);
+        if ($request->user()->tasks()->create($validatedData)) {
+            return redirect()->route('todos.index')->with('success', 'The task added successfully');
+        }else{
+            return redirect()->route('todos.index')->with('error', 'something went wrong');
+
+        }
+
+    }
+
+    /**
+     * Display the specified resource.
+     */
+    public function view(TodoModel $todoModel)
+    {
+        return view('todos.view',[
+            'todoModel' => $todoModel,
+            'statuses'=>TodoStatus::cases()
+        ]);
+    }
+
+    /**
+     * Show the form for editing the specified resource.
+     */
+    public function edit(TodoModel $todoModel)
+    {
+         return view('todos.update',[
+            'todoModel' => $todoModel,
+            'statuses'=>TodoStatus::cases()
+        ]);
+
+    }
+
+    /**
+     * Update the specified resource in storage.
+     */
+    public function update(Request $request, TodoModel $todoModel)
+    {
+        $this->authorize('update',$todoModel);
+        $validatedData = $request->validate([]);
+        $todoModel->update($validatedData);
+        return redirect()->route('todos.index')->with('success', 'The task updated successfully');
+    }
+
+    /**
+     * Remove the specified resource from storage.
+     */
+    public function destroy(TodoModel $todoModel)
+    {
+        $this->authorize('delete',$todoModel);
+        $todoModel->delete();
+        return redirect()->route('todos.index')->with('success', 'The task deleted successfully');
+    }
 }
