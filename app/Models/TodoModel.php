@@ -13,10 +13,11 @@ class TodoModel extends Model
     protected $table = 'todo_model';
     protected $primaryKey = 'id';
     protected $fillable=[
+        'user_id',
         'title',
         'body',
         'completed',
-        ];
+    ];
 
     protected $casts = [
         'completed' => TodoStatus::class
@@ -25,5 +26,10 @@ class TodoModel extends Model
     public function user(): BelongsTo
     {
         return $this->belongsTo(User::class);
+    }
+
+    public function isCompleted(): bool
+    {
+        return $this->completed===TodoStatus::COMPLETED_TASK;
     }
 }

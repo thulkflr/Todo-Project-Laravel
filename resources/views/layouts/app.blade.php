@@ -45,9 +45,10 @@
     @endif
 
     <!-- Page Content -->
-    <main>
-        {{ $slot }}
+    <main class="py-4 container">
+        @yield('content')
     </main>
+
 </div>
 </body>
 </html>

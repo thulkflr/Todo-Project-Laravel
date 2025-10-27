@@ -4,10 +4,13 @@ namespace App\Policies;
 
 use App\Models\TodoModel;
 use App\Models\User;
+use Illuminate\Auth\Access\HandlesAuthorization;
 use Illuminate\Auth\Access\Response;
 
 class TaskPolicy
 {
+    use HandlesAuthorization;
+
     /**
      * Determine whether the user can view any models.
      */
@@ -29,7 +32,7 @@ class TaskPolicy
      */
     public function create(User $user): bool
     {
-        return false;
+        return true;
     }
 
     /**
@@ -53,7 +56,7 @@ class TaskPolicy
      */
     public function restore(User $user, TodoModel $todoModel): bool
     {
-        return false;
+        return true;
     }
 
     /**

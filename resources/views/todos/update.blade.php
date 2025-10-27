@@ -1,23 +1,58 @@
-<x-app-layout>
-    <x-slot name="header">
-        <h2 class="font-semibold text-xl text-gray-800 dark:text-gray-200 leading-tight">
-            {{ __('تعديل المهمة: ') . $todoModel->title }}
-        </h2>
-    </x-slot>
+@extends('layouts.app')
 
-    <div class="py-12">
-        <div class="max-w-7xl mx-auto sm:px-6 lg:px-8">
-            <div class="bg-white dark:bg-gray-800 overflow-hidden shadow-sm sm:rounded-lg">
-                <div class="p-6 text-gray-900 dark:text-gray-100">
+@section('content')
+    <div class="container">
+        <h2>Edit Task</h2>
 
-                    <form method="POST" action="{{ route('todos.update', $task) }}" enctype="multipart/form-data">
-                        @csrf
-                        @method('PUT') @include('todos.partials._form', ['task' => $todoModel, 'statuses' => $statuses])
-
-                    </form>
-
-                </div>
+        @if ($errors->any())
+            <div class="alert alert-danger">
+                <ul class="mb-0">
+                    @foreach ($errors->all() as $error)
+                        <li>{{ $error }}</li>
+                    @endforeach
+                </ul>
             </div>
-        </div>
+        @endif
+
+        <form action="{{ route('tasks.update', $task) }}" method="POST" enctype="multipart/form-data">
+            @csrf
+            @method('PUT')
+
+            <div class="mb-3">
+                <label class="form-label">Title</label>
+                <input name="title" value="{{ old('title', $task->title) }}" class="form-control" required>
+            </div>
+
+            <div class="mb-3">
+                <label class="form-label">Description</label>
+                <textarea name="description" class="form-control">{{ old('description', $task->description) }}</textarea>
+            </div>
+
+            <div class="mb-3">
+                <label class="form-label">Status</label>
+                <select name="status" class="form-control" required>
+                    <option value="pending" {{ old('status', $task->status) == 'pending' ? 'selected' : '' }}>Pending</option>
+                    <option value="completed" {{ old('status', $task->status) == 'completed' ? 'selected' : '' }}>Completed</option>
+                </select>
+            </div>
+
+            <div class="mb-3">
+                <label class="form-label">Due Date</label>
+                <input type="date" name="due_date" value="{{ old('due_date', $task->due_date?->format('Y-m-d')) }}" class="form-control">
+            </div>
+
+            <div class="mb-3">
+                <label class="form-label">Attachment (existing)</label>
+                @if($task->attachment)
+                    <div class="mb-2">
+                        <a href="{{ asset('storage/'.$task->attachment) }}" target="_blank">View current attachment</a>
+                    </div>
+                @endif
+                <input type="file" name="attachment" class="form-control">
+            </div>
+
+            <button class="btn btn-primary">Update</button>
+            <a href="{{ route('tasks.index') }}" class="btn btn-secondary">Cancel</a>
+        </form>
     </div>
-</x-app-layout>
+@endsection

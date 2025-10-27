@@ -7,6 +7,7 @@ use App\Models\TodoModel;
 use Illuminate\Http\Request;
 use App\Http\Requests\UpdateTaskRequest;
 use App\Http\Requests\StoreTaskRequest;
+
 class TodoController extends Controller
 {
     /**
@@ -15,22 +16,27 @@ class TodoController extends Controller
     public function index(Request $request)
     {
 
-        $user =$request->user();
-        $userTasks = $user->todoModel();
+        $user = $request->user();
+        $status = $request->query('completed');
 
-        if($request->filled('search')){
-            $userTasks->where('title','like','%'.$request->input('search').'%');
+        $q = $request->query('q');
+        $query = TodoModel::where('user_id', $user->id);
+
+        if ($status && in_array($status, [TodoStatus::COMPLETED_TASK, TodoStatus::PENDING_TASK])) {
         }
-
-        if($request->filled('completed')){
-            $userTasks->where('completed',$request->input('completed'));
+        {
+            $query->where('completed', $status);
         }
-        $tasks = $userTasks->paginate(10)->withQueryString();
+        if ($q) {
+            $query->where('title', 'like', "%$q%");
+        }
+        $userTasks = $query->orderBy('created_at', 'desc')->paginate(15)->withQueryString();
 
-        return view('todos.index',[
-            'tasks' => $tasks,
-            'request' => $request,
-            'statuses'=>TodoStatus::cases()
+
+        return view('todos.index', [
+            'tasks' => $userTasks,
+            'statuses' => $status,
+            'q' => $q,
         ]);
 
 
@@ -41,8 +47,8 @@ class TodoController extends Controller
      */
     public function create()
     {
-        return view('todos.create',[
-            'statuses'=>TodoStatus::cases()
+        return view('todos.create', [
+            'statuses' => TodoStatus::cases()
         ]);
     }
 
@@ -52,9 +58,12 @@ class TodoController extends Controller
     public function store(Request $request)
     {
         $validatedData = $request->validate([]);
+        $validatedData['user_id'] = $request->user()->id;
+        TodoModel::create($validatedData);
+
         if ($request->user()->tasks()->create($validatedData)) {
             return redirect()->route('todos.index')->with('success', 'The task added successfully');
-        }else{
+        } else {
             return redirect()->route('todos.index')->with('error', 'something went wrong');
 
         }
@@ -64,11 +73,11 @@ class TodoController extends Controller
     /**
      * Display the specified resource.
      */
-    public function view(TodoModel $todoModel)
+    public function show(TodoModel $todoModel)
     {
-        return view('todos.view',[
+        $this->authorize('view', $todoModel);
+        return view('todos.view', [
             'todoModel' => $todoModel,
-            'statuses'=>TodoStatus::cases()
         ]);
     }
 
@@ -77,9 +86,10 @@ class TodoController extends Controller
      */
     public function edit(TodoModel $todoModel)
     {
-         return view('todos.update',[
+        $this->authorize('update', $todoModel);
+
+        return view('todos.update', [
             'todoModel' => $todoModel,
-            'statuses'=>TodoStatus::cases()
         ]);
 
     }
@@ -89,7 +99,7 @@ class TodoController extends Controller
      */
     public function update(Request $request, TodoModel $todoModel)
     {
-        $this->authorize('update',$todoModel);
+        $this->authorize('update', $todoModel);
         $validatedData = $request->validate([]);
         $todoModel->update($validatedData);
         return redirect()->route('todos.index')->with('success', 'The task updated successfully');
@@ -100,7 +110,7 @@ class TodoController extends Controller
      */
     public function destroy(TodoModel $todoModel)
     {
-        $this->authorize('delete',$todoModel);
+        $this->authorize('delete', $todoModel);
         $todoModel->delete();
         return redirect()->route('todos.index')->with('success', 'The task deleted successfully');
     }
