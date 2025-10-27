@@ -57,7 +57,9 @@ class TodoController extends Controller
      */
     public function store(Request $request)
     {
-        $validatedData = $request->validate([]);
+        $validatedData = $request->validate([
+
+        ]);
         $validatedData['user_id'] = $request->user()->id;
         TodoModel::create($validatedData);
 
