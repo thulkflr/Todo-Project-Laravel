@@ -1,7 +1,9 @@
 <?php
 
+use App\Http\Controllers\PostsController;
 use App\Http\Controllers\ProfileController;
 use App\Http\Controllers\TodoController;
+use App\Http\Controllers\UserController;
 use Illuminate\Support\Facades\Route;
 
 Route::get('/', function () {
@@ -31,4 +33,12 @@ Route::middleware(['auth'])->group(function () {
 Route::middleware(['auth'])->group(function () {
     Route::resource('todos', TodoController::class);
 });
+
+
+Route::get('/user/index',[UserController::class, 'index'])->name('users.index');
+Route::get('/user/show/{id}',[UserController::class, 'show'])->name('users.show');
+
+Route::get('/post/index',[PostsController::class, 'index'])->name('posts.index');
+Route::get('/post/show/{id}',[PostsController::class, 'show'])->name('posts.show');
+
 require __DIR__.'/auth.php';

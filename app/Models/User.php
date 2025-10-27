@@ -6,6 +6,7 @@ namespace App\Models;
 use Illuminate\Console\View\Components\Task;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Relations\HasMany;
+use Illuminate\Database\Eloquent\Relations\HasOne;
 use Illuminate\Foundation\Auth\User as Authenticatable;
 use Illuminate\Notifications\Notifiable;
 use Illuminate\Support\Str;
@@ -69,5 +70,14 @@ class User extends Authenticatable
     {
         return $this->hasMany(TodoModel::class)->orderByDesc('created_at');
 
+    }
+
+    public function profile(): HasOne
+    {
+        return $this->hasOne(Profile::class);
+
+    }
+    public function posts(): HasMany{
+        return $this->hasMany(Post::class)->latest();
     }
 }
